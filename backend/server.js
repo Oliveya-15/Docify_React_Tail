@@ -17,14 +17,14 @@ connectCloudinary()
 app.use(express.json())
 
 app.use(cors({
-  origin: [
-    "https://docify-frontend-yw8c.onrender.com",
-    "https://docify-admin.onrender.com"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "token"],
-  credentials: true
-}))
+    origin: [
+      "https://docify-frontend-yw8c.onrender.com",
+      "https://docify-admin.onrender.com"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "token", "atoken"],
+    credentials: true
+  }))
 
 app.options("*", cors())
 
