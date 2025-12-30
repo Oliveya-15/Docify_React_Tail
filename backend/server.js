@@ -15,9 +15,18 @@ connectCloudinary()
 
 //middlewares
 app.use(express.json())
+
 app.use(cors({
-    origin: "https://docify-frontend-yw8c.onrender.com"
-  }))
+  origin: [
+    "https://docify-frontend-yw8c.onrender.com",
+    "https://docify-admin.onrender.com"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "token"],
+  credentials: true
+}))
+
+app.options("*", cors())
 
 //api endpoints
 app.use('/api/admin/',adminRouter)
