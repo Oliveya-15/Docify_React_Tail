@@ -36,9 +36,9 @@ const styles = {
   logoRow: { display: 'flex', alignItems: 'center', gap: '10px' },
   logoIcon: {
     width: '42px', height: '42px',
-    background: 'linear-gradient(135deg, #5f6fff, #3d52d5)',
+    background: 'linear-gradient(135deg, #e8ecff, #d5dbff)',
     borderRadius: '12px', display: 'flex', alignItems: 'center',
-    justifyContent: 'center', fontSize: '22px',
+    justifyContent: 'center', fontSize: '25px',
   },
   title: { fontSize: '28px', fontWeight: '700', color: '#1a1a2e', letterSpacing: '-0.5px', margin: 0 },
   subtitle: { fontSize: '14px', color: '#6b7280', textAlign: 'center', margin: 0 },
