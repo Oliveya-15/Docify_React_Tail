@@ -24,7 +24,7 @@ app.use(cors({
       "https://docify-admin.onrender.com"
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "token", "atoken"],
+    allowedHeaders: ["Content-Type", "token", "atoken", "dtoken"],
     credentials: true
   }))
 
