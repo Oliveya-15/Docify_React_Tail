@@ -30,6 +30,17 @@ If user mentions self-harm or suicide respond: I hear you and I am so glad you r
 DOCIFY DOCTORS — USE ONLY THESE:
 ${doctorContext}`;
 
+// Clean Markdown formatting from the AI response
+const cleanResponse = (text) => {
+  return text
+    .replace(/\*\*/g, '')
+    .replace(/__/g, '')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\*\s+/gm, '• ')
+    .replace(/^-\s+/gm, '• ')
+    .trim();
+};
+
 export const chatWithDocTalk = async (req, res) => {
   try {
     const { message, mode, history = [] } = req.body;
@@ -85,56 +96,59 @@ export const chatWithDocTalk = async (req, res) => {
       { role: 'user', content: message },
     ];
 
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages,
-        max_tokens: 512,
-        temperature: mode === 'mental' ? 0.7 : 0.5,
-      }),
-    });
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', { 
+      method: 'POST', 
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${apiKey}`, 
+      }, 
+      body: JSON.stringify({ 
+        model: 'openai/gpt-oss-120b', 
+        messages, 
+        max_tokens: 512, 
+        temperature: mode === 'mental' ? 0.7 : 0.5, 
+      }), 
+    }); 
+ 
+    const data = await groqRes.json(); 
+ 
+    if (!groqRes.ok) { 
+      console.error('Groq API Error:', JSON.stringify(data, null, 2)); 
+      return res.status(500).json({ success: false, message: 'AI service error. Please try again.' }); 
+    } 
+ 
+    const rawReply = data?.choices?.[0]?.message?.content; 
+    if (!rawReply) { 
+      return res.status(500).json({ success: false, message: 'No response from AI.' }); 
+    } 
 
-    const data = await groqRes.json();
-
-    if (!groqRes.ok) {
-      console.error('Groq API Error:', JSON.stringify(data, null, 2));
-      return res.status(500).json({ success: false, message: 'AI service error. Please try again.' });
-    }
-
-    const reply = data?.choices?.[0]?.message?.content;
-    if (!reply) {
-      return res.status(500).json({ success: false, message: 'No response from AI.' });
-    }
-
-    // Match doctors mentioned in reply by full name or name without "Dr."
-    const replyLower = reply.toLowerCase();
-    const mentionedDoctors = doctors.filter(doc => {
-      const fullName = doc.name.toLowerCase();
-      const withoutDr = fullName.replace('dr. ', '').replace('dr.', '').trim();
-      return replyLower.includes(fullName) || replyLower.includes(withoutDr);
-    });
-
-    res.json({
-      success: true,
-      reply,
-      matchedDoctors: mentionedDoctors.map(d => ({
-        _id: d._id,
-        name: d.name,
-        speciality: d.speciality,
-        fees: d.fees,
-        available: d.available,
-        image: d.image,
-        address: d.address,
-      })),
-    });
-
-  } catch (error) {
-    console.error('DocTalk Error:', error.message);
-    res.status(500).json({ success: false, message: 'AI service unavailable. Please try again.' });
-  }
+    // Clean Markdown formatting before sending the response to the frontend
+    const reply = cleanResponse(rawReply);
+ 
+    // Match doctors mentioned in reply by full name or name without "Dr." 
+    const replyLower = reply.toLowerCase(); 
+    const mentionedDoctors = doctors.filter(doc => { 
+      const fullName = doc.name.toLowerCase(); 
+      const withoutDr = fullName.replace('dr. ', '').replace('dr.', '').trim(); 
+      return replyLower.includes(fullName) || replyLower.includes(withoutDr); 
+    }); 
+ 
+    res.json({ 
+      success: true, 
+      reply, 
+      matchedDoctors: mentionedDoctors.map(d => ({ 
+        _id: d._id, 
+        name: d.name, 
+        speciality: d.speciality, 
+        fees: d.fees, 
+        available: d.available, 
+        image: d.image, 
+        address: d.address, 
+      })), 
+    }); 
+ 
+  } catch (error) { 
+    console.error('DocTalk Error:', error.message); 
+    res.status(500).json({ success: false, message: 'AI service unavailable. Please try again.' }); 
+  } 
 };
